@@ -1,6 +1,12 @@
 from flask import Flask, request,jsonify
 import datetime
+from dotenv import load_dotenv
+import os
+import threading
+import requests
+import json
 
+load_dotenv()  
 app = Flask(__name__)
 myList = []
 @app.route('/webhook',methods = ['GET','POST'])
@@ -209,17 +215,52 @@ def awaitYes():
 
 def awaitTicket(data):
     try:
+        name = data['queryResult']['parameters']['name']['name']
         mydict = {
              'status':'ticket'
         }
         myList.append(mydict)
         print(myList)
+        ticket_thread = threading.Thread(target=createTicket, args=(name,))
+        ticket_thread.start()
         reply = {
-             'fulfillmentText': "Ticket Opened",
+             'fulfillmentText': "Ticket has been created successfully",
         }
     except Exception as e:
         print(e)
+
     return reply
+
+def createTicket(name):
+    access_token = generateAccessToken()
+    url = "https://desk.zoho.com/api/v1/tickets"
+    payload = json.dumps({
+        "subject": "Ticket Created From Chatbot",
+        "departmentId": os.getenv('DepartmentID'),
+        "contactId": os.getenv('ContactID'),
+        "description":f"This ticket has been created by {name} from Dialogflow Chatbot"
+    })
+    headers = {
+    'Authorization': f'Zoho-oauthtoken {access_token}',
+    'orgId': os.getenv('OrgID'),
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    data = response.json()
+    ticketNumber = data['ticketNumber']
+    print("Ticket Created Successfully!!! Here is the ticket number: ",ticketNumber)
+
+def generateAccessToken():
+    clientID = os.getenv('ClientID')
+    clientSecret = os.getenv('ClientSecret')
+    refreshToken = os.getenv('RefreshToken')
+    url = f"https://accounts.zoho.com/oauth/v2/token?refresh_token={refreshToken}&client_id={clientID}&client_secret={clientSecret}&grant_type=refresh_token"
+    response = requests.request("POST", url)
+    result = response.json()
+    access_token = result['access_token']
+    return access_token
+
 
 if __name__ == '__main__':
     app.run(debug=True)
