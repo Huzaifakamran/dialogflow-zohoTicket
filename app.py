@@ -23,7 +23,7 @@ def webhook():
             result = awaitYes(data)
             return jsonify(result)
         
-        elif data['queryResult']['intent']['displayName'] == '5.await-ticket':
+        elif data['queryResult']['intent']['displayName'] == '7.await-email':
             response = awaitTicket(data)
             return jsonify(response)
     except Exception as e:
@@ -208,6 +208,8 @@ def awaitTicket(data):
     try:
         personName = data['queryResult']['parameters']['name']['name']
         pci = data['queryResult']['parameters']['pci']
+        email = data['queryResult']['parameters']['email']
+        question = data['queryResult']['parameters']['question']
         status = 'ticket'
 
         DATABASE_URL = os.getenv("DATABASE_URL")
@@ -216,7 +218,7 @@ def awaitTicket(data):
         query1.execute("INSERT INTO public.users ( name, pci, status) Values (%s,%s,%s)",(personName,pci,status))
         query1.close()
         conn.commit()
-        ticket_thread = threading.Thread(target=createTicket, args=(personName,))
+        ticket_thread = threading.Thread(target=createTicket, args=(personName,email,question))
         ticket_thread.start()
         reply = {
              'fulfillmentText': "Ticket has been created successfully",
@@ -226,14 +228,14 @@ def awaitTicket(data):
 
     return reply
 
-def createTicket(name):
+def createTicket(name,email,question):
     access_token = generateAccessToken()
     url = "https://desk.zoho.com/api/v1/tickets"
     payload = json.dumps({
         "subject": "Ticket Created From Chatbot",
         "departmentId": os.getenv('DepartmentID'),
         "contactId": os.getenv('ContactID'),
-        "description":f"This ticket has been created by {name} from Dialogflow Chatbot"
+        "description":f"This ticket has been created by:\nName: {name}\nEmail: {email}\nQuestion: {question}"
     })
     headers = {
     'Authorization': f'Zoho-oauthtoken {access_token}',
