@@ -236,8 +236,8 @@ def createTicket(name,email,question):
         "departmentId": os.getenv('DepartmentID'),
         "contactId": os.getenv('ContactID'),
         "description":f"""This ticket has been created by
-            Name: {name}
-            Email: {email}
+            Name: {name},
+            Email: {email},
             Question: {question}"""
     })
     headers = {
