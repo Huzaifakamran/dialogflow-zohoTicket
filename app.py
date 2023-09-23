@@ -235,7 +235,10 @@ def createTicket(name,email,question):
         "subject": "Ticket Created From Chatbot",
         "departmentId": os.getenv('DepartmentID'),
         "contactId": os.getenv('ContactID'),
-        "description":f"This ticket has been created by:\nName: {name}\nEmail: {email}\nQuestion: {question}"
+        "description":f"""This ticket has been created by
+            Name: {name}
+            Email: {email}
+            Question: {question}"""
     })
     headers = {
     'Authorization': f'Zoho-oauthtoken {access_token}',
