@@ -1,7 +1,6 @@
-from flask import Flask, request,jsonify,session
+from flask import Flask, request,jsonify
 import datetime
 from dotenv import load_dotenv
-from flask_session import Session
 import os
 import threading
 import requests
@@ -10,8 +9,7 @@ import psycopg2
 
 load_dotenv()  
 app = Flask(__name__)
-app.config['SESSION_TYPE'] = 'filesystem'
-Session(app)
+
 
 @app.route('/webhook',methods = ['GET','POST'])
 def webhook():
@@ -22,7 +20,7 @@ def webhook():
             return jsonify(detail)
         
         elif data['queryResult']['intent']['displayName'] == '3.await-yes':
-            result = awaitYes()
+            result = awaitYes(data)
             return jsonify(result)
         
         elif data['queryResult']['intent']['displayName'] == '5.await-ticket':
@@ -33,12 +31,7 @@ def webhook():
 
 def details(data):
     try:
-        pci = data['queryResult']['parameters']['pci']
-        name = data['queryResult']['parameters']['name']['name']
-
-        session['name'] = name
-        session['pci'] = pci
-        
+        pci = data['queryResult']['parameters']['pci']    
         
         if pci.lower() == 'player' or pci.lower() == 'parent':
             reply = {
@@ -200,11 +193,10 @@ def details(data):
         print(e)
     return reply
 
-def awaitYes():
+def awaitYes(data):
     try:
-        
-        personName = session.get('name', None)
-        pci = session.get('pci', None)
+        pci = data['queryResult']['parameters']['pci']
+        personName = data['queryResult']['parameters']['name']['name']
         status = 'satisfied'
 
         DATABASE_URL = os.getenv("DATABASE_URL")
@@ -223,9 +215,8 @@ def awaitYes():
 
 def awaitTicket(data):
     try:
-        name = data['queryResult']['parameters']['name']['name']
-        personName = session.get('name', None)
-        pci = session.get('pci', None)
+        personName = data['queryResult']['parameters']['name']['name']
+        pci = data['queryResult']['parameters']['pci']
         status = 'ticket'
 
         DATABASE_URL = os.getenv("DATABASE_URL")
