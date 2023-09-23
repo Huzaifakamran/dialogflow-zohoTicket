@@ -105,10 +105,7 @@ def details(data):
                                 "text": "Team Insurance"
                             },
                             {
-                                "text": "Resource center / player tryout flyer"
-                            },
-                            {
-                                "text": "End of season player evaluation cards"
+                                "text": "ICC / coach Resource Center / player tryout flyers / looking for coaches flyers / vector logo files / end of season player evaluation cards / etc"
                             },
                             {
                                 "text": "50/50 Raffle"
@@ -163,13 +160,7 @@ def details(data):
                                 "text": "Team Insurance"
                             },
                             {
-                                "text": "Resource center / player tryout flyer"
-                            },
-                            {
-                                "text": "Looking for coaches flyer / vector logo files"
-                            },
-                            {
-                                "text": "End of season player evaluation cards"
+                                "text": "ICC / coach Resource Center / player tryout flyers / looking for coaches flyers / vector logo files / end of season player evaluation cards / etc"
                             },
                             {
                                 "text": "50/50 Raffle"
