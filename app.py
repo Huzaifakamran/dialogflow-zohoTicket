@@ -225,7 +225,7 @@ def awaitTicket(data):
         query1.execute("INSERT INTO public.users ( name, pci, status) Values (%s,%s,%s)",(personName,pci,status))
         query1.close()
         conn.commit()
-        ticket_thread = threading.Thread(target=createTicket, args=(name,))
+        ticket_thread = threading.Thread(target=createTicket, args=(personName,))
         ticket_thread.start()
         reply = {
              'fulfillmentText': "Ticket has been created successfully",
