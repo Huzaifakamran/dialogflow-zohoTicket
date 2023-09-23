@@ -1,6 +1,7 @@
-from flask import Flask, request,jsonify
+from flask import Flask, request,jsonify,session
 import datetime
 from dotenv import load_dotenv
+from flask_session import Session
 import os
 import threading
 import requests
@@ -9,7 +10,9 @@ import psycopg2
 
 load_dotenv()  
 app = Flask(__name__)
-myList = []
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
+
 @app.route('/webhook',methods = ['GET','POST'])
 def webhook():
     try:
@@ -32,12 +35,10 @@ def details(data):
     try:
         pci = data['queryResult']['parameters']['pci']
         name = data['queryResult']['parameters']['name']['name']
-        mydict = {
-             'name':name,
-             'date':datetime.datetime.now(),
-             'pci':pci
-        }
-        myList.append(mydict)
+
+        session['name'] = name
+        session['pci'] = pci
+        
         
         if pci.lower() == 'player' or pci.lower() == 'parent':
             reply = {
@@ -201,27 +202,10 @@ def details(data):
 
 def awaitYes():
     try:
-        mydict = {
-             'status':'satisfied'
-        }
-        myList.append(mydict)
-        print(myList)
-        names = []
-        pcis = []
-        statuses = []
-
-        # Iterate through the list of dictionaries
-        for item in myList:
-            if 'name' in item:
-                names.append(item['name'])
-            if 'pci' in item:
-                pcis.append(item['pci'])
-            if 'status' in item:
-                statuses.append(item['status'])
-
-        personName = names[0]
-        pci = pcis[0]
-        status = statuses[0]
+        
+        personName = session.get('name', None)
+        pci = session.get('pci', None)
+        status = 'satisfied'
 
         DATABASE_URL = os.getenv("DATABASE_URL")
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -240,27 +224,9 @@ def awaitYes():
 def awaitTicket(data):
     try:
         name = data['queryResult']['parameters']['name']['name']
-        mydict = {
-             'status':'ticket'
-        }
-        myList.append(mydict)
-        print(myList)
-        names = []
-        pcis = []
-        statuses = []
-
-        # Iterate through the list of dictionaries
-        for item in myList:
-            if 'name' in item:
-                names.append(item['name'])
-            if 'pci' in item:
-                pcis.append(item['pci'])
-            if 'status' in item:
-                statuses.append(item['status'])
-
-        personName = names[0]
-        pci = pcis[0]
-        status = statuses[0]
+        personName = session.get('name', None)
+        pci = session.get('pci', None)
+        status = 'ticket'
 
         DATABASE_URL = os.getenv("DATABASE_URL")
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
