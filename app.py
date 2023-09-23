@@ -5,6 +5,7 @@ import os
 import threading
 import requests
 import json
+import psycopg2
 
 load_dotenv()  
 app = Flask(__name__)
@@ -205,6 +206,29 @@ def awaitYes():
         }
         myList.append(mydict)
         print(myList)
+        names = []
+        pcis = []
+        statuses = []
+
+        # Iterate through the list of dictionaries
+        for item in myList:
+            if 'name' in item:
+                names.append(item['name'])
+            if 'pci' in item:
+                pcis.append(item['pci'])
+            if 'status' in item:
+                statuses.append(item['status'])
+
+        personName = names[0]
+        pci = pcis[0]
+        status = statuses[0]
+
+        DATABASE_URL = os.getenv("DATABASE_URL")
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        query1 = conn.cursor()
+        query1.execute("INSERT INTO public.users ( name, pci, status) Values (%s,%s,%s)",(personName,pci,status))
+        query1.close()
+        conn.commit()
         reply = {
              'fulfillmentText': "Thank you. Have a great day!!!",
         }
@@ -221,6 +245,29 @@ def awaitTicket(data):
         }
         myList.append(mydict)
         print(myList)
+        names = []
+        pcis = []
+        statuses = []
+
+        # Iterate through the list of dictionaries
+        for item in myList:
+            if 'name' in item:
+                names.append(item['name'])
+            if 'pci' in item:
+                pcis.append(item['pci'])
+            if 'status' in item:
+                statuses.append(item['status'])
+
+        personName = names[0]
+        pci = pcis[0]
+        status = statuses[0]
+
+        DATABASE_URL = os.getenv("DATABASE_URL")
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        query1 = conn.cursor()
+        query1.execute("INSERT INTO public.users ( name, pci, status) Values (%s,%s,%s)",(personName,pci,status))
+        query1.close()
+        conn.commit()
         ticket_thread = threading.Thread(target=createTicket, args=(name,))
         ticket_thread.start()
         reply = {
@@ -260,7 +307,6 @@ def generateAccessToken():
     result = response.json()
     access_token = result['access_token']
     return access_token
-
 
 if __name__ == '__main__':
     app.run(debug=True)
